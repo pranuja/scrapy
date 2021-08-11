@@ -1,0 +1,52 @@
+import scrapy
+from scrapy.crawler import CrawlerProcess
+import pandas as pd
+
+class AmazonSpider(scrapy.Spider):
+    name = 'pricebaba'
+    allowed_domains = ['pricebaba.com']
+
+    # search = input("enter your search:- ")
+    start_urls = ['https://pricebaba.com/laptop/pricelist/dell-laptops?brand=BRND-LENOVO&limit=40&LAPTOP-STG-TYPE=OPT-1452255073186&LAPTOP-PROC-NAME=OPT-1452764095743&LAPTOP-PROC-NAME=OPT-1472800921683&LAPTOP-PROC-NAME=OPT-1505199240690&sort=popularity-desc&active=true&status=10&status=20&status=30&LAPTOP-DISP-TOUCH=NO&LAPTOP-PROC-BRAND=OPT-1452252971100&start=0']
+
+    def parse(self, response):
+        name = response.xpath('//a[@class="productSKULink ellips-line ellips-line-ell-3 nav--nhdr prdp-prc txt-al-c"]/text()').extract()
+        Ram = response.xpath('//span[@class= "prdp-spc__cntnt"]/text()').extract()
+        # HD = response.xpath('//span[@class = "prdp-spc__cntnt"]/text()').extract()
+        # processor = response.xpath('//span[@class = "prdp-spc__cntnt"]/text()').extract()
+        # screen = response.xpath('//span[@class = "prdp-spc__cntnt"]/text()').extract()
+        price= response.xpath('//span[@class = "flt-l"]/text()').extract()
+
+        print(Ram)
+
+        screen = []
+        processor = []
+        ram = []
+        HD = []
+
+        for a in range(len(Ram)):
+            if(a % 4 == 0):
+                screen.append(Ram[a])
+            elif(a % 4 == 1):
+                processor.append(Ram[a])
+            elif(a%4 == 2):
+                ram.append(Ram[a])
+            elif(a%4 == 3):
+                HD.append(Ram[a])
+
+        for i in range(len(name)):
+            print(name[i])
+            print(screen[i])
+            print(processor[i])
+            print(ram[i])
+            print(HD[i])
+            print(price[i])
+
+        df = pd.DataFrame(list(zip(*[name, screen, processor, ram, HD, price]))).add_prefix('Col')
+
+        df.to_csv('file7.csv', index=False)
+        print(df)
+
+process = CrawlerProcess()
+process.crawl(AmazonSpider)
+process.start()
